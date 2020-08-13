@@ -8,9 +8,30 @@ const axiosGitHubGraphQL = axios.create({
   },
 });
 
-const GET_ORGANIZATION = ` {
+// const GET_ORGANIZATION = ` {
+// organization(login: "the-road-to-learn-react") { name
+// url }
+// } `;
+
+// const GET_REPOSITORY_OF_ORGANIZATION = ` {
+// organization(login: "the-road-to-learn-react") { name
+// url
+// repository(name: "the-road-to-learn-react") {
+// name
+// url } }
+// } `;
+
+const GET_ISSUES_OF_REPOSITORY = ` {
 organization(login: "the-road-to-learn-react") { name
-url }
+url
+repository(name: "the-road-to-learn-react") {
+name
+url
+issues(last: 5) {
+edges { node {
+id title url
+} }
+} } }
 } `;
 
 const TITLE = 'React GraphQL GitHub Client';
@@ -33,12 +54,16 @@ class App extends Component {
   };
 
   onFetchFromGitHub = () => {
-    axiosGitHubGraphQL.post('', { query: GET_ORGANIZATION }).then((result) =>
-      this.setState(() => ({
-        organization: result.data.data.organization,
-        errors: result.data.errors,
-      }))
-    );
+    // axiosGitHubGraphQL.post('', { query: GET_ORGANIZATION }).then((result) =>
+    axiosGitHubGraphQL
+      // .post('', { query: GET_REPOSITORY_OF_ORGANIZATION })
+      .post('', { query: GET_ISSUES_OF_REPOSITORY })
+      .then((result) =>
+        this.setState(() => ({
+          organization: result.data.data.organization,
+          errors: result.data.errors,
+        }))
+      );
   };
 
   render() {
@@ -74,7 +99,7 @@ const Organization = ({ organization, errors }) => {
     return (
       <p>
         <strong>Something went wrong:</strong>
-        {errors.map((error) => error.message).join(' ')}{' '}
+        {errors.map((error) => error.message).join(' ')}
       </p>
     );
   }
@@ -82,10 +107,28 @@ const Organization = ({ organization, errors }) => {
     <div>
       <p>
         <strong>Issues from Organization:</strong>
-        <a href={organization.url}>{organization.name}</a>{' '}
+        <a href={organization.url}>{organization.name}</a>
       </p>
+      <Repository repository={organization.repository} />
     </div>
   );
 };
+
+const Repository = ({ repository }) => (
+  <div>
+    <p>
+      <strong>In Repository:</strong>
+      <a href={repository.url}>{repository.name}</a>
+    </p>
+
+    <ul>
+      {repository.issues.edges.map((issue) => (
+        <li key={issue.node.id}>
+          <a href={issue.node.url}>{issue.node.title}</a>
+        </li>
+      ))}
+    </ul>
+  </div>
+);
 
 export default App;
