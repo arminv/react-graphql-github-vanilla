@@ -21,18 +21,67 @@ const axiosGitHubGraphQL = axios.create({
 // url } }
 // } `;
 
-const GET_ISSUES_OF_REPOSITORY = ` {
-organization(login: "the-road-to-learn-react") { name
-url
-repository(name: "the-road-to-learn-react") {
+// const GET_ISSUES_OF_REPOSITORY = ` {
+// organization(login: "the-road-to-learn-react") { name
+// url
+// repository(name: "the-road-to-learn-react") {
+// name
+// url
+// issues(last: 5) {
+// edges { node {
+// id title url
+// } }
+// } } }
+// } `;
+
+const GET_ISSUES_OF_REPOSITORY = `
+query ($organization: String!, $repository: String!) {
+    organization(login: $organization) {
 name
 url
-issues(last: 5) {
+repository(name: $repository) {
+        name
+        url
+        issues(last: 5) {
 edges { node {
-id title url
+id
+title
+url }
 } }
-} } }
+} }
 } `;
+
+const getIssuesOfRepositoryQuery = (organization, repository) => `
+{
+ organization(login: "${organization}") {
+  name
+  url
+  repository(name: "${repository}") {
+    name
+    url
+    issues(last: 5) {
+      edges { node {
+      id title url
+    } }
+  } }
+  } }
+`;
+
+const getIssuesOfRepository = (path) => {
+  const [organization, repository] = path.split('/');
+
+  return axiosGitHubGraphQL.post('', {
+    // query: getIssuesOfRepositoryQuery(organization, repository),
+    query: GET_ISSUES_OF_REPOSITORY,
+    variables: { organization, repository },
+  });
+};
+
+// Note: this is a higher-order function:
+const resolveIssuesQuery = (queryResult) => () => ({
+  organization: queryResult.data.data.organization,
+  errors: queryResult.data.errors,
+});
 
 const TITLE = 'React GraphQL GitHub Client';
 class App extends Component {
@@ -43,27 +92,21 @@ class App extends Component {
   };
   componentDidMount() {
     // fetch data
-    this.onFetchFromGitHub();
+    this.onFetchFromGitHub(this.state.path);
   }
   onChange = (event) => {
     this.setState({ path: event.target.value });
   };
   onSubmit = (event) => {
     // fetch data
+    this.onFetchFromGitHub(this.state.path);
     event.preventDefault();
   };
 
-  onFetchFromGitHub = () => {
-    // axiosGitHubGraphQL.post('', { query: GET_ORGANIZATION }).then((result) =>
-    axiosGitHubGraphQL
-      // .post('', { query: GET_REPOSITORY_OF_ORGANIZATION })
-      .post('', { query: GET_ISSUES_OF_REPOSITORY })
-      .then((result) =>
-        this.setState(() => ({
-          organization: result.data.data.organization,
-          errors: result.data.errors,
-        }))
-      );
+  onFetchFromGitHub = (path) => {
+    getIssuesOfRepository(path).then((queryResult) =>
+      this.setState(resolveIssuesQuery(queryResult))
+    );
   };
 
   render() {
