@@ -51,21 +51,21 @@ url }
 } }
 } `;
 
-const getIssuesOfRepositoryQuery = (organization, repository) => `
-{
- organization(login: "${organization}") {
-  name
-  url
-  repository(name: "${repository}") {
-    name
-    url
-    issues(last: 5) {
-      edges { node {
-      id title url
-    } }
-  } }
-  } }
-`;
+// const getIssuesOfRepositoryQuery = (organization, repository) => `
+// {
+//  organization(login: "${organization}") {
+//   name
+//   url
+//   repository(name: "${repository}") {
+//     name
+//     url
+//     issues(last: 5) {
+//       edges { node {
+//       id title url
+//     } }
+//   } }
+//   } }
+// `;
 
 const getIssuesOfRepository = (path) => {
   const [organization, repository] = path.split('/');
