@@ -34,6 +34,22 @@ const axiosGitHubGraphQL = axios.create({
 // } } }
 // } `;
 
+// const getIssuesOfRepositoryQuery = (organization, repository) => `
+// {
+//  organization(login: "${organization}") {
+//   name
+//   url
+//   repository(name: "${repository}") {
+//     name
+//     url
+//     issues(last: 5) {
+//       edges { node {
+//       id title url
+//     } }
+//   } }
+//   } }
+// `;
+
 const GET_ISSUES_OF_REPOSITORY = `
 query ($organization: String!, $repository: String!) {
     organization(login: $organization) {
@@ -51,22 +67,6 @@ url }
 } }
 } `;
 
-// const getIssuesOfRepositoryQuery = (organization, repository) => `
-// {
-//  organization(login: "${organization}") {
-//   name
-//   url
-//   repository(name: "${repository}") {
-//     name
-//     url
-//     issues(last: 5) {
-//       edges { node {
-//       id title url
-//     } }
-//   } }
-//   } }
-// `;
-
 const getIssuesOfRepository = (path) => {
   const [organization, repository] = path.split('/');
 
@@ -77,7 +77,7 @@ const getIssuesOfRepository = (path) => {
   });
 };
 
-// Note: this is a higher-order function:
+// Note: this is a higher-order function (it has to be for useState() to work properly):
 const resolveIssuesQuery = (queryResult) => () => ({
   organization: queryResult.data.data.organization,
   errors: queryResult.data.errors,
