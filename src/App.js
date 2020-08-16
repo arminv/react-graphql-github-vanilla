@@ -50,6 +50,7 @@ const axiosGitHubGraphQL = axios.create({
 //   } }
 // `;
 
+// Note: cursor is not a mandatory argument (hence no ! after its type):
 const GET_ISSUES_OF_REPOSITORY = `
   query ($organization: String!, $repository: String!, $cursor: String) {
     organization(login: $organization) {
